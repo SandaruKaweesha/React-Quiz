@@ -13,9 +13,10 @@ export default function App() {
     // Loading,Error,Ready,active,finished
     status: "Loading",
     index: 0,
+    answers:null
   };
   
-  const [{ questions, status ,index}, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status ,index,answers}, dispatch] = useReducer(reducer, initialState);
   const numQuestions = questions.length;
 
 
@@ -34,6 +35,11 @@ export default function App() {
         return{
           ...state,
           status: 'active'
+        }
+      case "newAnswer":
+        return{
+          ...state,
+          answers: action.payload
         }
       default:
         throw new Error("Action unknown ");
@@ -55,7 +61,7 @@ export default function App() {
         {status === "Loading" && <Loader />}
         {status === "ready" && <Start numQuestions={numQuestions}  dispatch={dispatch}/>}
         {status === "Error" && <Error />}
-        {status === "active" && <Question question={questions[index]}  /> }
+        {status === "active" && <Question question={questions[index]} dispatch={dispatch} answers={answers} /> }
       </MainBoady>
     </div>
   );
