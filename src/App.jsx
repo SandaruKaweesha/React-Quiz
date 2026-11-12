@@ -7,23 +7,33 @@ import Start from "./Start";
 import Question from "./Question";
 import NextButton from "./components/NextButton";
 import Progress from "./components/Progress";
+import FinishEd from "./components/FinishEd";
+import Timer from "./components/Timer";
+import Footer from "./components/Footer";
+
+const initialState = {
+  questions: [],
+  // Loading,Error,Ready,active,finished
+  status: "Loading",
+  index: 0,
+  answers: null,
+  points: 0,
+  highScore: 0,
+  secondsRemaining: null,
+};
+
+const SECONDS_PER_QUESTION = 30;
 
 export default function App() {
-  const initialState = {
-    questions: [],
-    // Loading,Error,Ready,active,finished
-    status: "Loading",
-    index: 0,
-    answers: null,
-    points: 0,
-  };
-
-  const [{ questions, status, index, answers ,points}, dispatch] = useReducer(
-    reducer,
-    initialState,
+  const [
+    { questions, status, index, answers, points, highScore, secondsRemaining },
+    dispatch,
+  ] = useReducer(reducer, initialState);
+  const numQuestions = questions.length;
+  const maxPossiblePoints = questions.reduce(
+    (prev, cur) => prev + cur.points,
+    0,
   );
-  const  numQuestions = questions.length;
-  const maxPossiblePoints=questions.reduce((prev,cur)=>prev+cur.points,0)
 
   function reducer(state, action) {
     switch (action.type) {
@@ -40,6 +50,7 @@ export default function App() {
         return {
           ...state,
           status: "active",
+          secondsRemaining: state.questions.length*SECONDS_PER_QUESTION,
         };
       case "newAnswer":
         // Figure out the current question
@@ -60,6 +71,28 @@ export default function App() {
           ...state,
           index: state.index + 1,
           answers: null,
+        };
+
+      case "finish":
+        return {
+          ...state,
+          status: "finished",
+          highScore:
+            state.points > state.highScore ? state.points : state.highScore,
+        };
+
+      case "reset":
+        return {
+          initialState,
+          questions: state.questions,
+          status: "ready",
+        };
+
+      case "tick":
+        return {
+          ...state,
+          secondsRemaining: state.secondsRemaining - 1,
+          status: state.secondsRemaining === 0 ? "finished" : state.status,
         };
       default:
         throw new Error("Action unknown ");
@@ -85,15 +118,36 @@ export default function App() {
         {status === "Error" && <Error />}
         {status === "active" && (
           <>
-            <Progress index={index} numQuestions={numQuestions} points={points} maxPossiblePoints={maxPossiblePoints} answers={answers} />
+            <Progress
+              index={index}
+              numQuestions={numQuestions}
+              points={points}
+              maxPossiblePoints={maxPossiblePoints}
+              answers={answers}
+            />
             <Question
               question={questions[index]}
               dispatch={dispatch}
               answers={answers}
             />
-
-            <NextButton dispatch={dispatch} answers={answers} />
+            <Footer>
+              <Timer dispatch={dispatch} secondsRemaining={secondsRemaining} />
+              <NextButton
+                dispatch={dispatch}
+                answers={answers}
+                index={index}
+                numOfQuesations={numQuestions}
+              />
+            </Footer>
           </>
+        )}
+        {status === "finished" && (
+          <FinishEd
+            points={points}
+            maxPossiblePoints={maxPossiblePoints}
+            highScore={highScore}
+            dispatch={dispatch}
+          />
         )}
       </MainBoady>
     </div>

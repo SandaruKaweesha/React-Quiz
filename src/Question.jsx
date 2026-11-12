@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Options from './components/Options'
 function Question({question, dispatch, answers}) {
   return (
