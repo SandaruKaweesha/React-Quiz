@@ -13,7 +13,8 @@ export default function App() {
     // Loading,Error,Ready,active,finished
     status: "Loading",
     index: 0,
-    answers:null
+    answers:null,
+    points: 0
   };
   
   const [{ questions, status ,index,answers}, dispatch] = useReducer(reducer, initialState);
@@ -37,9 +38,15 @@ export default function App() {
           status: 'active'
         }
       case "newAnswer":
+        // Figure out the current question
+        const question = state.questions.at(state.index);
+
+        // Check if the answer is correct
+
         return{
           ...state,
-          answers: action.payload
+          answers: action.payload,
+          points : action.payload === question.correctOption ? state.points + question.points : state.points          
         }
       default:
         throw new Error("Action unknown ");
