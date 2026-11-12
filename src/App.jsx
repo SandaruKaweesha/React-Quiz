@@ -5,21 +5,23 @@ import Loader from "./Loader";
 import Error from "./Error";
 import Start from "./Start";
 import Question from "./Question";
+import NextButton from "./components/NextButton";
 
 export default function App() {
-  
   const initialState = {
     questions: [],
     // Loading,Error,Ready,active,finished
     status: "Loading",
     index: 0,
-    answers:null,
-    points: 0
+    answers: null,
+    points: 0,
   };
-  
-  const [{ questions, status ,index,answers}, dispatch] = useReducer(reducer, initialState);
-  const numQuestions = questions.length;
 
+  const [{ questions, status, index, answers }, dispatch] = useReducer(
+    reducer,
+    initialState,
+  );
+  const numQuestions = questions.length;
 
   function reducer(state, action) {
     switch (action.type) {
@@ -32,22 +34,31 @@ export default function App() {
           status: "Error",
         };
 
-      case 'start':
-        return{
+      case "start":
+        return {
           ...state,
-          status: 'active'
-        }
+          status: "active",
+        };
       case "newAnswer":
         // Figure out the current question
         const question = state.questions.at(state.index);
 
         // Check if the answer is correct
-
-        return{
+        return {
           ...state,
           answers: action.payload,
-          points : action.payload === question.correctOption ? state.points + question.points : state.points          
-        }
+          points:
+            action.payload === question.correctOption
+              ? state.points + question.points
+              : state.points,
+        };
+
+      case "nextQuestion":
+        return {
+          ...state,
+          index: state.index + 1,
+          answers: null,
+        };
       default:
         throw new Error("Action unknown ");
     }
@@ -66,9 +77,21 @@ export default function App() {
 
       <MainBoady>
         {status === "Loading" && <Loader />}
-        {status === "ready" && <Start numQuestions={numQuestions}  dispatch={dispatch}/>}
+        {status === "ready" && (
+          <Start numQuestions={numQuestions} dispatch={dispatch} />
+        )}
         {status === "Error" && <Error />}
-        {status === "active" && <Question question={questions[index]} dispatch={dispatch} answers={answers} /> }
+        {status === "active" && (
+          <>
+            <Question
+              question={questions[index]}
+              dispatch={dispatch}
+              answers={answers}
+            />
+
+            <NextButton dispatch={dispatch} answers={answers} />
+          </>
+        )}
       </MainBoady>
     </div>
   );
