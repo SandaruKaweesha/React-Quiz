@@ -6,6 +6,7 @@ import Error from "./Error";
 import Start from "./Start";
 import Question from "./Question";
 import NextButton from "./components/NextButton";
+import Progress from "./components/Progress";
 
 export default function App() {
   const initialState = {
@@ -17,11 +18,12 @@ export default function App() {
     points: 0,
   };
 
-  const [{ questions, status, index, answers }, dispatch] = useReducer(
+  const [{ questions, status, index, answers ,points}, dispatch] = useReducer(
     reducer,
     initialState,
   );
-  const numQuestions = questions.length;
+  const  numQuestions = questions.length;
+  const maxPossiblePoints=questions.reduce((prev,cur)=>prev+cur.points,0)
 
   function reducer(state, action) {
     switch (action.type) {
@@ -83,6 +85,7 @@ export default function App() {
         {status === "Error" && <Error />}
         {status === "active" && (
           <>
+            <Progress index={index} numQuestions={numQuestions} points={points} maxPossiblePoints={maxPossiblePoints} answers={answers} />
             <Question
               question={questions[index]}
               dispatch={dispatch}
